@@ -1,6 +1,8 @@
 package bookcontroller
 
 import (
+	"errors"
+
 	"github.com/gilangmahardhika/golang-web/models"
 	"github.com/gilangmahardhika/golang-web/responses"
 	"github.com/gofiber/fiber/v2"
@@ -16,7 +18,23 @@ func Index(c *fiber.Ctx) error {
 }
 
 func Show(c *fiber.Ctx) error {
-	return nil
+	var book models.Book
+	var response responses.Error
+
+	id := c.Params("id")
+	result := models.DB.First(&book, id)
+	log.Info(book)
+
+	if result.RowsAffected == 0 {
+		log.Warn("Not Found")
+		response.Message = errors.New("book not found")
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"data": response,
+		})
+	}
+	log.Info(book)
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"data": book})
 }
 
 func Create(c *fiber.Ctx) error {
@@ -46,7 +64,40 @@ func Create(c *fiber.Ctx) error {
 }
 
 func Update(c *fiber.Ctx) error {
-	return nil
+	var book models.Book
+	var response responses.Error
+
+	id := c.Params("id")
+	result := models.DB.First(&book, id)
+	log.Info(book)
+
+	if result.RowsAffected == 0 {
+		log.Warn("Not Found")
+		response.Message = errors.New("book not found")
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"data": response,
+		})
+	}
+
+	if err := c.BodyParser(&book); err != nil {
+		log.Warn(err)
+		response.Message = err
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"data": response,
+		})
+
+	}
+
+	if err := models.DB.Save(&book).Error; err != nil {
+		log.Warn(err)
+		response.Message = err
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"data": response,
+		})
+
+	}
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"data": book})
 }
 
 func Delete(c *fiber.Ctx) error {
