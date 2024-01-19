@@ -12,4 +12,5 @@ type Book struct {
 	PublishedDate string    `gorm:"type:date;NOT NULL" required:"true" json:"published_date"`
 	CreatedAt     time.Time `gorm:"type:datetime;default:CURRENT_TIMESTAMP();<-:create" json:"created_at"`
 	UpdatedAt     time.Time `gorm:"type:datetime;default:CURRENT_TIMESTAMP()" json:"updated_at"`
+	Reviews       []Review  `gorm:"foreign_key:Id" json:"reviews"`
 }

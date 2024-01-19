@@ -9,7 +9,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// var conn config.DatabaseConfig
 var conn = config.DatabaseConfig{
 	User:         os.Getenv("MYSQL_USER"),
 	Password:     os.Getenv("MYSQL_PASSWORD"),
@@ -22,12 +21,11 @@ var DB *gorm.DB
 
 func ConnectDatabase() {
 	fmt.Println(config.ConnectDB(&conn))
-	// db, err := gorm.Open(mysql.Open("root:root@tcp(127.0.0.1:3307)/go_fiber?parseTime=true"))
 	db, err := gorm.Open(mysql.Open(config.ConnectDB(&conn)))
 	if err != nil {
 		panic(err)
 	}
 
-	db.AutoMigrate(&Book{})
+	db.AutoMigrate(&Book{}, &User{}, &Review{})
 	DB = db
 }
