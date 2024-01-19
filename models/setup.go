@@ -1,14 +1,29 @@
 package models
 
 import (
+	"fmt"
+	"os"
+
+	"github.com/gilangmahardhika/golang-web/config"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
+// var conn config.DatabaseConfig
+var conn = config.DatabaseConfig{
+	User:         os.Getenv("MYSQL_USER"),
+	Password:     os.Getenv("MYSQL_PASSWORD"),
+	Host:         os.Getenv("MYSQL_HOST"),
+	Port:         os.Getenv("MYSQL_PORT"),
+	DatabaseName: os.Getenv("GOLANG_WEB_DB_NAME"),
+}
+
 var DB *gorm.DB
 
 func ConnectDatabase() {
-	db, err := gorm.Open(mysql.Open("root:root@tcp(127.0.0.1:3306)/go_fiber?parseTime=true"))
+	fmt.Println(config.ConnectDB(&conn))
+	// db, err := gorm.Open(mysql.Open("root:root@tcp(127.0.0.1:3307)/go_fiber?parseTime=true"))
+	db, err := gorm.Open(mysql.Open(config.ConnectDB(&conn)))
 	if err != nil {
 		panic(err)
 	}

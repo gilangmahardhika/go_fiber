@@ -1,8 +1,6 @@
 package bookcontroller
 
 import (
-	"errors"
-
 	"github.com/gilangmahardhika/golang-web/models"
 	"github.com/gilangmahardhika/golang-web/responses"
 	"github.com/gofiber/fiber/v2"
@@ -27,7 +25,7 @@ func Show(c *fiber.Ctx) error {
 
 	if result.RowsAffected == 0 {
 		log.Warn("Not Found")
-		response.Message = errors.New("book not found")
+		response.Message = "book not found"
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"data": response,
 		})
@@ -42,7 +40,7 @@ func Create(c *fiber.Ctx) error {
 	var response responses.Error
 	if err := c.BodyParser(&book); err != nil {
 		log.Warn(err)
-		response.Message = err
+		response.Message = err.Error()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"data": response,
 		})
@@ -51,7 +49,7 @@ func Create(c *fiber.Ctx) error {
 
 	if err := models.DB.Create(&book).Error; err != nil {
 		log.Warn(err)
-		response.Message = err
+		response.Message = err.Error()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"data": response,
 		})
@@ -73,7 +71,7 @@ func Update(c *fiber.Ctx) error {
 
 	if result.RowsAffected == 0 {
 		log.Warn("Not Found")
-		response.Message = errors.New("book not found")
+		response.Message = "book not found"
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"data": response,
 		})
@@ -81,7 +79,7 @@ func Update(c *fiber.Ctx) error {
 
 	if err := c.BodyParser(&book); err != nil {
 		log.Warn(err)
-		response.Message = err
+		response.Message = err.Error()
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"data": response,
 		})
@@ -90,7 +88,7 @@ func Update(c *fiber.Ctx) error {
 
 	if err := models.DB.Save(&book).Error; err != nil {
 		log.Warn(err)
-		response.Message = err
+		response.Message = err.Error()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"data": response,
 		})
@@ -101,5 +99,22 @@ func Update(c *fiber.Ctx) error {
 }
 
 func Delete(c *fiber.Ctx) error {
-	return nil
+	var book models.Book
+	var response responses.Error
+
+	id := c.Params("id")
+	result := models.DB.First(&book, id).Delete(&book)
+	log.Info(book)
+
+	if result.RowsAffected == 0 {
+		log.Warn("Not Found")
+		response.Message = "book not found"
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"data": response,
+		})
+	}
+
+	response.Message = "book has been deleted"
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"data": response})
 }
